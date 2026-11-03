@@ -1,6 +1,16 @@
 #include <SystemConfiguration/SystemConfiguration.h>
+#include <CoreFoundation/CoreFoundation.h>
+#include <string.h>
 
 #define STUB() printf("STUB %s\n", __func__)
+
+static CFStringRef
+sc_copy_string(const char *text)
+{
+	if (text == NULL)
+		text = "";
+	return CFStringCreateWithCString(NULL, text, kCFStringEncodingUTF8);
+}
 
 const CFStringRef kSCDynamicStoreUseSessionKeys = CFSTR("UseSessionKeys");
 
@@ -100,48 +110,77 @@ SCNetworkReachabilityRef SCNetworkReachabilityCreateWithAddress(CFAllocatorRef a
 
 CFStringRef SCDynamicStoreKeyCreateNetworkGlobalEntity(CFAllocatorRef allocator, CFStringRef domain, CFStringRef entity)
 {
-	STUB();
-	return NULL;
+	(void)allocator;
+	(void)domain;
+	(void)entity;
+	return sc_copy_string("State:/Network/Global/IPv4");
 }
 
 CFPropertyListRef SCDynamicStoreCopyValue(SCDynamicStoreRef store, CFStringRef key)
 {
-	STUB();
+	(void)store;
+	(void)key;
 	return NULL;
 }
 
 SCDynamicStoreRef SCDynamicStoreCreate(CFAllocatorRef allocator, CFStringRef name, SCDynamicStoreCallBack callout, SCDynamicStoreContext *context)
 {
-	STUB();
-	return NULL;
+	(void)allocator;
+	(void)name;
+	(void)callout;
+	(void)context;
+	return (SCDynamicStoreRef)CFDictionaryCreateMutable(NULL, 0,
+		&kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
 }
 
 SCDynamicStoreRef __nullable SCDynamicStoreCreateWithOptions(CFAllocatorRef __nullable allocator, CFStringRef name, CFDictionaryRef __nullable storeOptions, SCDynamicStoreCallBack __nullable callout, SCDynamicStoreContext* __nullable context)
 {
-    STUB();
-	return NULL;
+	(void)storeOptions;
+	return SCDynamicStoreCreate(allocator, name, callout, context);
 };
 
 CFStringRef SCDynamicStoreKeyCreate(CFAllocatorRef allocator, CFStringRef fmt, ...)
 {
-	STUB();
-	return NULL;
+	(void)allocator;
+	if (fmt == NULL)
+		return sc_copy_string("");
+	return CFStringCreateCopy(NULL, fmt);
+}
+
+static void
+sc_store_perform(void *info)
+{
+	(void)info;
+}
+
+CFRunLoopSourceRef SCDynamicStoreCreateRunLoopSource(CFAllocatorRef allocator, SCDynamicStoreRef store, CFIndex order)
+{
+	CFRunLoopSourceContext ctx;
+
+	(void)store;
+	(void)order;
+	memset(&ctx, 0, sizeof(ctx));
+	ctx.perform = sc_store_perform;
+	return CFRunLoopSourceCreate(allocator, 0, &ctx);
 }
 
 Boolean SCDynamicStoreSetDispatchQueue(SCDynamicStoreRef store, dispatch_queue_t queue)
 {
-	STUB();
-	return FALSE;
+	(void)store;
+	(void)queue;
+	return TRUE;
 }
 
 Boolean SCDynamicStoreSetNotificationKeys(SCDynamicStoreRef store, CFArrayRef __nullable keys, CFArrayRef __nullable patterns) {
-	STUB();
-	return FALSE;
+	(void)store;
+	(void)keys;
+	(void)patterns;
+	return TRUE;
 }
 
 CFStringRef SCDynamicStoreKeyCreateComputerName(CFAllocatorRef allocator) {
-	STUB();
-	return NULL;
+	(void)allocator;
+	return sc_copy_string("Setup:/System");
 };
 
 Boolean SCPreferencesSetComputerName(SCPreferencesRef	prefs, CFStringRef __nullable	name, CFStringEncoding	nameEncoding) {
@@ -155,11 +194,14 @@ Boolean SCPreferencesSetLocalHostName(SCPreferencesRef	prefs, CFStringRef __null
 };
 
 CFStringRef SCDynamicStoreKeyCreateHostNames(CFAllocatorRef allocator) {
-	STUB();
-	return NULL;
+	(void)allocator;
+	return sc_copy_string("Setup:/Network/HostNames");
 };
 
 CFStringRef SCDynamicStoreKeyCreateNetworkInterfaceEntity(CFAllocatorRef allocator, CFStringRef domain, CFStringRef ifname, CFStringRef entity) {
-	STUB();
-	return NULL;
+	(void)allocator;
+	(void)domain;
+	(void)ifname;
+	(void)entity;
+	return sc_copy_string("State:/Network/Interface/en0/IPv4");
 };

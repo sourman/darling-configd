@@ -117,3 +117,10 @@ add_framework(SystemConfiguration
 		CoreFoundation
 		cxx
 )
+
+# Comet dyld compatibility stubs
+if(TARGET SystemConfiguration_obj)
+  target_sources(SystemConfiguration_obj PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/comet_stubs.m)
+elseif(TARGET SystemConfiguration)
+  target_sources(SystemConfiguration PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/comet_stubs.m)
+endif()
